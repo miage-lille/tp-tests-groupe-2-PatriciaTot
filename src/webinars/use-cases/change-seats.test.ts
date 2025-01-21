@@ -115,5 +115,30 @@ describe('Feature : Change seats', () => {
       const existingWebinar = await webinarRepository.findByIdSync('webinar-id');
       expect(existingWebinar?.props.seats).toEqual(100);
     });
+    
+    describe('Scenario: change seat to a number > 1000', () => {
+      const payload = {
+        user: testUser.alice,
+        webinarId: 'webinar-id',
+        seats: 1001,
+      };
+
+      it('should throw WebinarTooManySeatsException', async () => {
+        // ACT & ASSERT
+        await expect(useCase.execute(payload)).rejects.toThrow(WebinarTooManySeatsException);
+      });
+
+      it('should not modify the existing webinar', async () => {
+        // ACT
+        try {
+          await useCase.execute(payload);
+        } catch (error) {}
+
+        // ASSERT
+        const existingWebinar = await webinarRepository.findByIdSync('webinar-id');
+        expect(existingWebinar?.props.seats).toEqual(100);
+      });
+    });
+
 
 });
