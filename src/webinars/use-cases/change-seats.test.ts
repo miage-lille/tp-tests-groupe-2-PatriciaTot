@@ -88,9 +88,32 @@ describe('Feature : Change seats', () => {
       } catch (error) {}
 
       // ASSERT
-      const existingWebinar = await webinarRepository.findById('webinar-id');
+      const existingWebinar = await webinarRepository.findByIdSync('webinar-id');
       expect(existingWebinar?.props.seats).toEqual(100);
     });
   });
+
+  describe('Scenario: change seat to an inferior number', () => {
+    const payload = {
+      user: testUser.alice,
+      webinarId: 'webinar-id',
+      seats: 50,
+    };
+
+    it('should throw WebinarReduceSeatsException', async () => {
+      // ACT & ASSERT
+      await expect(useCase.execute(payload)).rejects.toThrow(WebinarReduceSeatsException);
+    });
+
+    it('should not modify the existing webinar', async () => {
+      // ACT
+      try {
+        await useCase.execute(payload);
+      } catch (error) {}
+
+      // ASSERT
+      const existingWebinar = await webinarRepository.findByIdSync('webinar-id');
+      expect(existingWebinar?.props.seats).toEqual(100);
+    });
 
 });
