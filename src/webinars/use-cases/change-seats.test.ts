@@ -1,4 +1,3 @@
-// Tests unitaires
 import { InMemoryWebinarRepository } from 'src/webinars/adapters/webinar-repository.in-memory';
 import { ChangeSeats } from 'src/webinars/use-cases/change-seats';
 import { testUser } from 'src/users/tests/user-seeds';
@@ -12,6 +11,7 @@ describe('Feature : Change seats', () => {
   let webinarRepository: InMemoryWebinarRepository;
   let useCase: ChangeSeats;
 
+  // Création d'un webinar de 100 places avec Alice comme organisatrice
   const webinar = new Webinar({
     id: 'webinar-id',
     organizerId: testUser.alice.props.id,
@@ -22,9 +22,11 @@ describe('Feature : Change seats', () => {
   });
 
   beforeEach(() => {
-    webinarRepository = new InMemoryWebinarRepository([webinar]);
-    useCase = new ChangeSeats(webinarRepository);
+    webinarRepository = new InMemoryWebinarRepository([webinar]); // Ajout du webinar dans le repository
+    useCase = new ChangeSeats(webinarRepository); // Création de l'instance du cas d'utilisation
   });
+  
+  // Tests unitaires
 
   describe('Scenario: Happy path', () => {
     const payload = {
@@ -53,6 +55,30 @@ describe('Feature : Change seats', () => {
     it('should throw WebinarNotFoundException', async () => {
       // ACT & ASSERT
       await expect(useCase.execute(payload)).rejects.toThrow(WebinarNotFoundException);
+    });
+
+    it('should not modify the existing webinar', async () => {
+      // ACT
+      try {
+        await useCase.execute(payload);
+      } catch (error) {}
+
+      // ASSERT
+      const existingWebinar = await webinarRepository.findByIdSync('webinar-id');
+      expect(existingWebinar?.props.seats).toEqual(100);
+    });
+  });
+
+  describe('Scenario: update the webinar of someone else', () => {
+    const payload = {
+      user: testUser.bob,
+      webinarId: 'webinar-id',
+      seats: 200,
+    };
+
+    it('should throw WebinarNotOrganizerException', async () => {
+      // ACT & ASSERT
+      await expect(useCase.execute(payload)).rejects.toThrow(WebinarNotOrganizerException);
     });
 
     it('should not modify the existing webinar', async () => {
