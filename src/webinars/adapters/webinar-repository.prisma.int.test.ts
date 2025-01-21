@@ -7,6 +7,7 @@ import { exec } from 'child_process';
 import { PrismaWebinarRepository } from 'src/webinars/adapters/webinar-repository.prisma';
 import { Webinar } from 'src/webinars/entities/webinar.entity';
 import { promisify } from 'util';
+import { WebinarNotFoundException } from 'src/webinars/exceptions/webinar-not-found';
 
 const asyncExec = promisify(exec);
 
@@ -129,6 +130,71 @@ describe('PrismaWebinarRepository', () => {
     });
   });
 
+  describe('Scenario : repository.update', () => {
+    it('should update an existing webinar', async () => {
+      // ARRANGE
+      const webinar = new Webinar({
+        id: 'webinar-id',
+        organizerId: 'organizer-id',
+        title: 'Original title',
+        startDate: new Date('2022-01-01T00:00:00Z'),
+        endDate: new Date('2022-01-01T01:00:00Z'),
+        seats: 100,
+      });
+  
+      await prismaClient.webinar.create({
+        data: {
+          id: webinar.props.id,
+          organizerId: webinar.props.organizerId,
+          title: webinar.props.title,
+          startDate: webinar.props.startDate,
+          endDate: webinar.props.endDate,
+          seats: webinar.props.seats,
+        },
+      });
+  
+      const updatedWebinar = new Webinar({
+        id: 'webinar-id',
+        organizerId: 'organizer-id',
+        title: 'Updated title',
+        startDate: new Date('2022-01-02T00:00:00Z'),
+        endDate: new Date('2022-01-02T01:00:00Z'),
+        seats: 200,
+      });
+  
+      // ACT
+      await repository.update(updatedWebinar);
+  
+      // ASSERT
+      const maybeWebinar = await prismaClient.webinar.findUnique({
+        where: { id: 'webinar-id' },
+      });
+      expect(maybeWebinar).toEqual({
+        id: 'webinar-id',
+        organizerId: 'organizer-id',
+        title: 'Updated title',
+        startDate: new Date('2022-01-02T00:00:00Z'),
+        endDate: new Date('2022-01-02T01:00:00Z'),
+        seats: 200,
+      });
+    });
+  
+    it('should throw an error if the webinar does not exist', async () => {
+      // ARRANGE
+      const nonExistentWebinar = new Webinar({
+        id: 'non-existent-id',
+        organizerId: 'organizer-id',
+        title: 'Non-existent webinar',
+        startDate: new Date('2022-01-01T00:00:00Z'),
+        endDate: new Date('2022-01-01T01:00:00Z'),
+        seats: 100,
+      });
+  
+      // ACT & ASSERT
+      await expect(repository.update(nonExistentWebinar)).rejects.toThrow();
+    });
+  });
+  
 
 });
 
