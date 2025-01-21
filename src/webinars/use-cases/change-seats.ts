@@ -5,6 +5,7 @@ import { WebinarNotOrganizerException } from 'src/webinars/exceptions/webinar-no
 import { WebinarReduceSeatsException } from 'src/webinars/exceptions/webinar-reduce-seats';
 import { WebinarTooManySeatsException } from 'src/webinars/exceptions/webinar-too-many-seats';
 import { IWebinarRepository } from 'src/webinars/ports/webinar-repository.interface';
+
 type Request = {
   user: User;
   webinarId: string;
