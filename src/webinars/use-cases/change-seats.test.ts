@@ -6,6 +6,9 @@ import { WebinarNotFoundException } from 'src/webinars/exceptions/webinar-not-fo
 import { WebinarNotOrganizerException } from 'src/webinars/exceptions/webinar-not-organizer';
 import { WebinarReduceSeatsException } from 'src/webinars/exceptions/webinar-reduce-seats';
 import { WebinarTooManySeatsException } from 'src/webinars/exceptions/webinar-too-many-seats';
+import { User } from 'src/users/entities/user.entity';
+import { expectWebinarToRemainUnchanged, whenUserChangeSeatsWith, thenUpdatedWebinarSeatsShouldBe } from 'src/webinars/tests/fixtures';
+
 
 describe('Feature : Change seats', () => {
   let webinarRepository: InMemoryWebinarRepository;
@@ -37,11 +40,10 @@ describe('Feature : Change seats', () => {
 
     it('should change the number of seats for a webinar', async () => {
       // ACT
-      await useCase.execute(payload);
+      await whenUserChangeSeatsWith(useCase, payload);
 
       // ASSERT
-      const updatedWebinar = await webinarRepository.findById('webinar-id');
-      expect(updatedWebinar?.props.seats).toEqual(200);
+      await thenUpdatedWebinarSeatsShouldBe(webinarRepository, 200);
     });
   });
 
@@ -54,18 +56,17 @@ describe('Feature : Change seats', () => {
 
     it('should throw WebinarNotFoundException', async () => {
       // ACT & ASSERT
-      await expect(useCase.execute(payload)).rejects.toThrow(WebinarNotFoundException);
+      await expect(whenUserChangeSeatsWith(useCase, payload)).rejects.toThrow(WebinarNotFoundException);
     });
 
     it('should not modify the existing webinar', async () => {
       // ACT
       try {
-        await useCase.execute(payload);
+        await whenUserChangeSeatsWith(useCase, payload);
       } catch (error) {}
 
       // ASSERT
-      const existingWebinar = await webinarRepository.findByIdSync('webinar-id');
-      expect(existingWebinar?.props.seats).toEqual(100);
+      await expectWebinarToRemainUnchanged(webinarRepository);
     });
   });
 
@@ -78,18 +79,18 @@ describe('Feature : Change seats', () => {
 
     it('should throw WebinarNotOrganizerException', async () => {
       // ACT & ASSERT
-      await expect(useCase.execute(payload)).rejects.toThrow(WebinarNotOrganizerException);
+      await expect(whenUserChangeSeatsWith(useCase, payload)).rejects.toThrow(WebinarNotOrganizerException);
     });
 
     it('should not modify the existing webinar', async () => {
       // ACT
       try {
-        await useCase.execute(payload);
+        await whenUserChangeSeatsWith(useCase, payload);
       } catch (error) {}
 
       // ASSERT
       const existingWebinar = await webinarRepository.findByIdSync('webinar-id');
-      expect(existingWebinar?.props.seats).toEqual(100);
+      await expectWebinarToRemainUnchanged(webinarRepository);
     });
   });
 
@@ -102,18 +103,18 @@ describe('Feature : Change seats', () => {
 
     it('should throw WebinarReduceSeatsException', async () => {
       // ACT & ASSERT
-      await expect(useCase.execute(payload)).rejects.toThrow(WebinarReduceSeatsException);
+      await expect(whenUserChangeSeatsWith(useCase, payload)).rejects.toThrow(WebinarReduceSeatsException);
     });
 
     it('should not modify the existing webinar', async () => {
       // ACT
       try {
-        await useCase.execute(payload);
+        await whenUserChangeSeatsWith(useCase, payload);
       } catch (error) {}
 
       // ASSERT
       const existingWebinar = await webinarRepository.findByIdSync('webinar-id');
-      expect(existingWebinar?.props.seats).toEqual(100);
+      await expectWebinarToRemainUnchanged(webinarRepository);
     });
     
     describe('Scenario: change seat to a number > 1000', () => {
@@ -125,18 +126,18 @@ describe('Feature : Change seats', () => {
 
       it('should throw WebinarTooManySeatsException', async () => {
         // ACT & ASSERT
-        await expect(useCase.execute(payload)).rejects.toThrow(WebinarTooManySeatsException);
+        await expect(whenUserChangeSeatsWith(useCase, payload)).rejects.toThrow(WebinarTooManySeatsException);
       });
 
       it('should not modify the existing webinar', async () => {
         // ACT
         try {
-          await useCase.execute(payload);
+          await whenUserChangeSeatsWith(useCase, payload);
         } catch (error) {}
 
         // ASSERT
         const existingWebinar = await webinarRepository.findByIdSync('webinar-id');
-        expect(existingWebinar?.props.seats).toEqual(100);
+        await expectWebinarToRemainUnchanged(webinarRepository);
       });
     });
 
