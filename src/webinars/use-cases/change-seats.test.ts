@@ -7,7 +7,7 @@ import { WebinarNotOrganizerException } from 'src/webinars/exceptions/webinar-no
 import { WebinarReduceSeatsException } from 'src/webinars/exceptions/webinar-reduce-seats';
 import { WebinarTooManySeatsException } from 'src/webinars/exceptions/webinar-too-many-seats';
 import { User } from 'src/users/entities/user.entity';
-import { expectWebinarToRemainUnchanged, whenUserChangeSeatsWith, thenUpdatedWebinarSeatsShouldBe } from 'src/webinars/tests/fixtures';
+import { expectWebinarToRemainUnchanged, whenUserChangeSeatsWith, thenUpdatedWebinarSeatsShouldBe } from 'src/tests/fixtures';
 
 
 describe('Feature : Change seats', () => {

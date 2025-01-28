@@ -44,7 +44,7 @@ describe('PrismaWebinarRepository', () => {
     repository = new PrismaWebinarRepository(prismaClient);
     await prismaClient.webinar.deleteMany();
     await prismaClient.$executeRawUnsafe('DELETE FROM "Webinar" CASCADE');
-  });
+  }, 30000);
 
   // Après tous les tests, on arrête le conteneur Docker et on se déconnecte de la base de données
   afterAll(async () => {
